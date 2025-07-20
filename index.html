@@ -9,52 +9,109 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: "Modern Professional" -->
-    <!-- Application Structure Plan: The application is structured as a top-to-bottom single-page narrative. It starts with a strong Hero section for immediate impact, followed by a summary. The core is an interactive Skills Dashboard where users can filter skill categories, and a dynamic Career Timeline that reveals job details on click. This structure was chosen to guide a recruiter through a logical flow—who he is, what he knows, where he's been—in an engaging, non-linear way, making deep-dives into specific areas intuitive and clean. -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&family=Inter:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <!-- Chosen Palette: "Cyber Network" -->
+    <!-- Application Structure Plan: The application structure remains a top-to-bottom single-page narrative but with a significantly enhanced UI/UX. The new design uses a dark theme with a dynamic, animated network background to create an immersive "network engineer" feel. Sections are presented as "glassmorphism" cards that float over the animation. This enhances the original goal of a logical flow while adding a strong thematic layer and a "wow" factor that makes exploration more engaging. -->
     <!-- Visualization & Content Choices: 
-        - Report Info: Overall skill set. -> Goal: Compare/Inform. -> Viz: Radar Chart. -> Interaction: Hover tooltips. -> Justification: Provides a high-level, visually compelling summary of core competencies, replacing the original CV's inaccurate bars. -> Library: Chart.js (Canvas).
-        - Report Info: Detailed list of technical skills. -> Goal: Organize. -> Presentation: Interactive Filterable List. -> Interaction: Click category buttons to show/hide relevant skills. -> Justification: Manages a large amount of information cleanly, allowing users to explore areas of interest without being overwhelmed by a long static list. -> Library: Vanilla JS + Tailwind.
-        - Report Info: Work History. -> Goal: Show Progression. -> Presentation: Vertical Timeline. -> Interaction: Click to expand/collapse job details. -> Justification: Visualizes career growth over time and keeps the UI tidy by hiding extensive details until requested. -> Library: Vanilla JS + Tailwind.
-        - Report Info: GPA/Education. -> Goal: Inform. -> Presentation: Simple Text. -> Interaction: None. -> Justification: A single data point does not require a complex visualization. Clear text is most effective.
+        - Report Info: Overall skill set. -> Goal: Compare/Inform. -> Viz: Restyled Radar Chart. -> Interaction: Hover tooltips. -> Justification: The radar chart is effective; its styling is updated for the dark theme with glowing accents to fit the new aesthetic. -> Library: Chart.js (Canvas).
+        - Report Info: Detailed list of technical skills. -> Goal: Organize. -> Presentation: Interactive Filterable List within a glassmorphism card. -> Interaction: Click category buttons to show/hide skills. -> Justification: The filtering interaction is maintained for usability, but the presentation is updated to match the high-tech theme. -> Library: Vanilla JS + Tailwind.
+        - Report Info: Work History. -> Goal: Show Progression. -> Presentation: Futuristic Vertical Timeline. -> Interaction: Click to expand/collapse details. -> Justification: The timeline is redesigned with glowing nodes and animated reveals to feel like a system log or mission progression, enhancing the theme. -> Library: Vanilla JS + Tailwind.
+        - Report Info: Hero Title. -> Goal: Engage. -> Presentation: Text with a typing animation. -> Interaction: Visual animation on load. -> Justification: Adds a dynamic, tech-centric introduction that immediately captures attention. -> Library: Vanilla JS.
     -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-            /* slate-50 */
-            color: #334155;
-            /* slate-700 */
+            background-color: #020617;
+            /* slate-950 */
+            color: #cbd5e1;
+            /* slate-300 */
+        }
+
+        #network-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .font-mono {
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        .glass-card {
+            background-color: rgba(15, 23, 42, 0.6);
+            /* slate-900 with opacity */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            /* slate-700 with opacity */
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .glass-card:hover {
+            background-color: rgba(30, 41, 59, 0.7);
+            /* slate-800 with opacity */
+            border-color: rgba(71, 85, 105, 0.7);
         }
 
         .nav-link {
-            transition: color 0.3s, border-bottom-color 0.3s;
-            border-bottom: 2px solid transparent;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #22d3ee;
+            /* cyan-400 */
+            transition: width 0.3s;
         }
 
         .nav-link:hover,
         .nav-link.active {
-            color: #0ea5e9;
-            /* sky-500 */
-            border-bottom-color: #0ea5e9;
+            color: #22d3ee;
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
         }
 
         .skill-btn {
-            transition: background-color 0.3s, color 0.3s, transform 0.2s;
+            background-color: rgba(30, 41, 59, 0.8);
+            border: 1px solid #334155;
+            transition: background-color 0.3s, color 0.3s, transform 0.2s, box-shadow 0.3s;
+        }
+
+        .skill-btn:hover {
+            background-color: #0e7490;
+            /* cyan-700 */
+            color: white;
+            transform: translateY(-2px);
         }
 
         .skill-btn.active {
-            background-color: #0ea5e9;
-            /* sky-500 */
-            color: white;
+            background-color: #22d3ee;
+            /* cyan-400 */
+            color: #020617;
             transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.4);
         }
 
         .timeline-item .details {
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
             padding-top: 0;
             padding-bottom: 0;
         }
@@ -63,6 +120,15 @@
             max-height: 1000px;
             padding-top: 1rem;
             padding-bottom: 1rem;
+        }
+
+        .timeline-node {
+            transition: box-shadow 0.3s, background-color 0.3s;
+        }
+
+        .timeline-item.open .timeline-node {
+            background-color: #22d3ee;
+            box-shadow: 0 0 20px #22d3ee;
         }
 
         .timeline-item .icon {
@@ -88,31 +154,52 @@
                 height: 400px;
             }
         }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.25rem;
+            background-color: #22d3ee;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 
-<body class="bg-slate-50 text-slate-700">
+<body class="text-slate-300">
+    <canvas id="network-bg"></canvas>
 
-    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+    <header class="bg-slate-900/50 backdrop-blur-lg sticky top-0 z-50 border-b border-slate-800">
         <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex-shrink-0">
-                    <a href="#home" class="text-xl font-bold text-slate-800">Raka Ariya Ramadhani</a>
+                    <a href="#home" class="text-xl font-bold text-white font-mono">Raka A. Ramadhani /></a>
                 </div>
                 <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-4">
-                        <a href="#summary" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Summary</a>
-                        <a href="#skills" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Skills</a>
-                        <a href="#experience" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Experience</a>
-                        <a href="#education" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Education</a>
-                        <a href="#contact" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Contact</a>
+                    <div class="ml-10 flex items-baseline space-x-6">
+                        <a href="#summary" class="nav-link px-3 py-2 text-sm font-medium">Summary</a>
+                        <a href="#skills" class="nav-link px-3 py-2 text-sm font-medium">Skills</a>
+                        <a href="#experience" class="nav-link px-3 py-2 text-sm font-medium">Experience</a>
+                        <a href="#education" class="nav-link px-3 py-2 text-sm font-medium">Education</a>
+                        <a href="#contact" class="nav-link px-3 py-2 text-sm font-medium">Contact</a>
                     </div>
                 </div>
                 <div class="md:hidden">
                     <button id="mobile-menu-button"
-                        class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-slate-500 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-500">
+                        class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-white hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-cyan-400">
                         <span class="sr-only">Open main menu</span>
-                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        <svg class="h-6 w-6 block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 6h16M4 12h16M4 18h16" />
@@ -133,234 +220,338 @@
         </nav>
     </header>
 
-    <main class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-        <section id="home" class="min-h-[60vh] flex items-center py-20">
+        <section id="home" class="min-h-[70vh] flex items-center py-20">
             <div class="w-full text-center">
-                <h1 class="text-4xl md:text-6xl font-bold text-slate-900 tracking-tight">Raka Ariya Ramadhani, S.Kom
-                </h1>
-                <p class="mt-4 text-lg md:text-xl text-sky-600 font-medium">Network Engineer & IT Operations Specialist
-                </p>
-                <div class="mt-8 flex justify-center items-center space-x-6 text-slate-600">
+                <h1 class="text-4xl md:text-6xl font-bold text-white tracking-tight">Raka Ariya Ramadhani, S.Kom</h1>
+                <p id="typing-text" class="mt-4 text-lg md:text-xl text-cyan-400 font-medium font-mono h-7"></p>
+                <div class="mt-8 flex justify-center items-center space-x-6 text-slate-400">
                     <a href="https://linkedin.com/in/raka-ariya-ramadhani/" target="_blank"
-                        class="hover:text-sky-500 transition-colors">
+                        class="hover:text-cyan-400 transition-colors" aria-label="LinkedIn">
                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path
                                 d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                         </svg>
                     </a>
-                    <a href="mailto:aka.arya7@gmail.com" class="hover:text-sky-500 transition-colors">
+                    <a href="mailto:aka.arya7@gmail.com" class="hover:text-cyan-400 transition-colors"
+                        aria-label="Email">
                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path
-                                d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                                d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-.4 4.25l-7.1 4.44c-.32.2-.74.2-1.06 0L4.4 8.25a.85.85 0 11.9-1.44L12 11.25l6.7-4.44a.85.85 0 11.9 1.44z" />
                         </svg>
                     </a>
                 </div>
             </div>
         </section>
 
-        <section id="summary" class="py-16 md:py-24">
-            <div class="max-w-3xl mx-auto text-center">
-                <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Professional Summary</h2>
-                <div class="w-24 h-1 bg-sky-500 mx-auto mt-4 mb-8"></div>
-                <p class="text-lg text-slate-600 leading-relaxed">
-                    A results-driven IT professional with five years of experience in network engineering and IT
-                    operations. I have proven expertise in designing, implementing, and managing robust network
-                    infrastructures with a strong focus on Cisco, Mikrotik, and cloud-based solutions. I possess a deep
-                    interest in cloud computing and have a track record of successfully executing complex technical
-                    projects, optimizing system performance, and ensuring high availability of critical services.
-                </p>
-            </div>
-        </section>
-
-        <section id="skills" class="py-16 md:py-24 bg-white rounded-xl shadow-md">
-            <div class="text-center">
-                <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Technical Skills Dashboard</h2>
-                <p class="mt-4 max-w-2xl mx-auto text-slate-600">This section provides an interactive overview of my
-                    technical capabilities. The chart visualizes my core competency areas, while the buttons below allow
-                    you to filter and explore the specific technologies and platforms I work with. Click a category to
-                    see the details.</p>
-                <div class="w-24 h-1 bg-sky-500 mx-auto mt-4 mb-8"></div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mt-12">
-                <div class="chart-container">
-                    <canvas id="skillsRadarChart"></canvas>
+        <div class="space-y-24">
+            <section id="summary" class="py-16 md:py-20 glass-card rounded-xl">
+                <div class="max-w-3xl mx-auto text-center px-6">
+                    <h2 class="text-3xl font-bold text-white tracking-tight">Professional Summary</h2>
+                    <div class="w-24 h-1 bg-cyan-400 mx-auto mt-4 mb-8"></div>
+                    <p class="text-lg text-slate-300 leading-relaxed">
+                        A results-driven IT professional with five years of experience in network engineering and IT
+                        operations. I have proven expertise in designing, implementing, and managing robust network
+                        infrastructures with a strong focus on Cisco, Mikrotik, and cloud-based solutions. I possess a
+                        deep interest in cloud computing and have a track record of successfully executing complex
+                        technical projects, optimizing system performance, and ensuring high availability of critical
+                        services.
+                    </p>
                 </div>
-                <div class="flex flex-col items-center lg:items-start">
-                    <div class="flex flex-wrap justify-center lg:justify-start gap-3 mb-6">
-                        <button
-                            class="skill-btn active px-4 py-2 bg-slate-200 text-slate-700 font-medium rounded-full shadow-sm"
-                            data-skill="networking">Networking</button>
-                        <button
-                            class="skill-btn px-4 py-2 bg-slate-200 text-slate-700 font-medium rounded-full shadow-sm"
-                            data-skill="hardware">Hardware</button>
-                        <button
-                            class="skill-btn px-4 py-2 bg-slate-200 text-slate-700 font-medium rounded-full shadow-sm"
-                            data-skill="cloud">Cloud & Virtualization</button>
-                        <button
-                            class="skill-btn px-4 py-2 bg-slate-200 text-slate-700 font-medium rounded-full shadow-sm"
-                            data-skill="os">Operating Systems</button>
-                        <button
-                            class="skill-btn px-4 py-2 bg-slate-200 text-slate-700 font-medium rounded-full shadow-sm"
-                            data-skill="monitoring">Monitoring & Mgmt</button>
-                    </div>
-                    <div id="skill-details"
-                        class="w-full max-w-md bg-slate-50 p-6 rounded-lg border border-slate-200 min-h-[180px]">
-                    </div>
-                </div>
-            </div>
-        </section>
+            </section>
 
-        <section id="experience" class="py-16 md:py-24">
-            <div class="text-center">
-                <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Career Timeline</h2>
-                <p class="mt-4 max-w-2xl mx-auto text-slate-600">My professional journey has provided me with diverse
-                    experiences, from hands-on IT support to complex network engineering. The timeline below details my
-                    roles and accomplishments. Click on each role to expand and see my key contributions and
-                    responsibilities.</p>
-                <div class="w-24 h-1 bg-sky-500 mx-auto mt-4 mb-8"></div>
-            </div>
-            <div class="max-w-3xl mx-auto mt-12">
-                <div class="relative">
-                    <div class="absolute left-4 top-0 h-full w-0.5 bg-slate-300"></div>
-                    <div class="space-y-12">
-                        <div class="timeline-item pl-10 relative">
-                            <div
-                                class="absolute left-4 top-2 -ml-2.5 w-5 h-5 bg-white border-4 border-sky-500 rounded-full">
-                            </div>
-                            <button class="w-full text-left group">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <h3 class="text-xl font-semibold text-slate-800">Engineer on Site</h3>
-                                        <p class="text-md text-slate-600">PT. Linknet, Tbk</p>
-                                        <p class="text-sm text-slate-500">December 2021 – Present</p>
-                                    </div>
-                                    <span
-                                        class="icon text-sky-500 transform transition-transform duration-300 mr-2">&#9654;</span>
-                                </div>
-                                <div class="details text-slate-600 leading-relaxed">
-                                    <ul class="list-disc list-inside space-y-2 mt-2">
-                                        <li>Engineered and maintained a stable, high-quality network and IT
-                                            infrastructure.</li>
-                                        <li>Strengthened network security by configuring IPsec VPNs and failover links
-                                            on Mikrotik routers.</li>
-                                        <li>Re-engineered the IP address schema for guest and back-office networks.</li>
-                                        <li>Deployed and managed network environments via Ruijie, Unifi, and TP-Link
-                                            Omada cloud controllers.</li>
-                                        <li>Established a monitoring system using Grafana and a Telegram bot for
-                                            real-time alerts.</li>
-                                        <li>Implemented a QNap NAS, IPTV system, and various digital signage solutions.
-                                        </li>
-                                    </ul>
-                                </div>
-                            </button>
+            <section id="skills" class="py-16 md:py-20 glass-card rounded-xl">
+                <div class="text-center px-6">
+                    <h2 class="text-3xl font-bold text-white tracking-tight">Technical Skills Dashboard</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-slate-400">This section provides an interactive overview of my
+                        technical capabilities. The chart visualizes my core competency areas, while the buttons below
+                        allow you to filter and explore the specific technologies and platforms I work with. Click a
+                        category to see the details.</p>
+                    <div class="w-24 h-1 bg-cyan-400 mx-auto mt-4 mb-8"></div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mt-12 px-6">
+                    <div class="chart-container">
+                        <canvas id="skillsRadarChart"></canvas>
+                    </div>
+                    <div class="flex flex-col items-center lg:items-start">
+                        <div class="flex flex-wrap justify-center lg:justify-start gap-3 mb-6">
+                            <button class="skill-btn active px-4 py-2 text-slate-200 font-medium rounded-full"
+                                data-skill="networking">Networking</button>
+                            <button class="skill-btn px-4 py-2 text-slate-200 font-medium rounded-full"
+                                data-skill="hardware">Hardware</button>
+                            <button class="skill-btn px-4 py-2 text-slate-200 font-medium rounded-full"
+                                data-skill="cloud">Cloud & Virtualization</button>
+                            <button class="skill-btn px-4 py-2 text-slate-200 font-medium rounded-full"
+                                data-skill="os">Operating Systems</button>
+                            <button class="skill-btn px-4 py-2 text-slate-200 font-medium rounded-full"
+                                data-skill="monitoring">Monitoring & Mgmt</button>
                         </div>
-                        <div class="timeline-item pl-10 relative">
-                            <div
-                                class="absolute left-4 top-2 -ml-2.5 w-5 h-5 bg-white border-4 border-sky-500 rounded-full">
-                            </div>
-                            <button class="w-full text-left group">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <h3 class="text-xl font-semibold text-slate-800">IT Engineering (Internship)
-                                        </h3>
-                                        <p class="text-md text-slate-600">Perum LPPNPI (Airnav Indonesia)</p>
-                                        <p class="text-sm text-slate-500">September 2019 – November 2019</p>
-                                    </div>
-                                    <span
-                                        class="icon text-sky-500 transform transition-transform duration-300 mr-2">&#9654;</span>
-                                </div>
-                                <div class="details text-slate-600 leading-relaxed">
-                                    <ul class="list-disc list-inside space-y-2 mt-2">
-                                        <li>Performed routine system maintenance, including server monitoring and data
-                                            backups.</li>
-                                        <li>Provided troubleshooting and support for critical systems like Clonezilla,
-                                            Symantec Ghost, and DivOS.</li>
-                                    </ul>
-                                </div>
-                            </button>
-                        </div>
-                        <div class="timeline-item pl-10 relative">
-                            <div
-                                class="absolute left-4 top-2 -ml-2.5 w-5 h-5 bg-white border-4 border-sky-500 rounded-full">
-                            </div>
-                            <button class="w-full text-left group">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <h3 class="text-xl font-semibold text-slate-800">IT Support (Part-Time)</h3>
-                                        <p class="text-md text-slate-600">Notaris PPAT Fitrianingsih, SH</p>
-                                        <p class="text-sm text-slate-500">July 2017 – August 2019</p>
-                                    </div>
-                                    <span
-                                        class="icon text-sky-500 transform transition-transform duration-300 mr-2">&#9654;</span>
-                                </div>
-                                <div class="details text-slate-600 leading-relaxed">
-                                    <ul class="list-disc list-inside space-y-2 mt-2">
-                                        <li>Designed and deployed the office's local area network (LAN) from the ground
-                                            up.</li>
-                                        <li>Implemented secure remote access solutions using FTPS and Nextcloud servers.
-                                        </li>
-                                        <li>Managed network hardware (Huawei, Mikrotik) and virtual environments
-                                            (VMware, Ubuntu Server).</li>
-                                    </ul>
-                                </div>
-                            </button>
+                        <div id="skill-details"
+                            class="w-full max-w-md bg-slate-900/70 p-6 rounded-lg border border-slate-700 min-h-[180px]">
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <section id="education" class="py-16 md:py-24 bg-white rounded-xl shadow-md">
-            <div class="text-center">
-                <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Education & Certifications</h2>
-                <p class="mt-4 max-w-2xl mx-auto text-slate-600">My formal education provided the foundation for my
-                    technical career, complemented by industry-standard certifications that validate my skills.</p>
-                <div class="w-24 h-1 bg-sky-500 mx-auto mt-4 mb-8"></div>
-            </div>
-            <div class="max-w-4xl mx-auto mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 text-center">
-                <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                    <h3 class="text-xl font-semibold text-slate-800">Serang Raya University</h3>
-                    <p class="text-slate-600 mt-1">Bachelor of Computer Science (S.Kom), Computer Systems</p>
-                    <p class="text-sm text-slate-500">2017 – 2021</p>
-                    <p class="mt-2 font-medium text-sky-600">GPA: 3.59</p>
+            <section id="experience" class="py-16 md:py-20">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold text-white tracking-tight">Career Timeline</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-slate-400">My professional journey has provided me with
+                        diverse experiences, from hands-on IT support to complex network engineering. The timeline below
+                        details my roles and accomplishments. Click on each role to expand and see my key contributions
+                        and responsibilities.</p>
+                    <div class="w-24 h-1 bg-cyan-400 mx-auto mt-4 mb-8"></div>
                 </div>
-                <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                    <h3 class="text-xl font-semibold text-slate-800">Industry Certifications</h3>
-                    <ul class="mt-2 space-y-1 text-slate-600">
-                        <li>CCNA</li>
-                        <li>Mikrotik Certified</li>
-                        <li>Ruijie Reyee Certified</li>
-                    </ul>
+                <div class="max-w-3xl mx-auto mt-12">
+                    <div class="relative">
+                        <div class="absolute left-4 top-0 h-full w-0.5 bg-slate-700"></div>
+                        <div class="space-y-12">
+                            <div class="timeline-item pl-12 relative">
+                                <div
+                                    class="timeline-node absolute left-4 top-1 -ml-[11px] w-6 h-6 bg-slate-800 border-4 border-slate-700 rounded-full">
+                                </div>
+                                <button class="w-full text-left group">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h3 class="text-xl font-semibold text-white">Engineer on Site</h3>
+                                            <p class="text-md text-slate-400">PT. Linknet, Tbk</p>
+                                            <p class="text-sm text-slate-500 font-mono">December 2021 – Present</p>
+                                        </div>
+                                        <span
+                                            class="icon text-cyan-400 transform transition-transform duration-300 mr-2">&#9654;</span>
+                                    </div>
+                                    <div class="details text-slate-300 leading-relaxed">
+                                        <ul class="list-disc list-inside space-y-2 mt-2 pl-2 marker:text-cyan-400">
+                                            <li>Engineered and maintained a stable, high-quality network and IT
+                                                infrastructure.</li>
+                                            <li>Strengthened network security by configuring IPsec VPNs and failover
+                                                links on Mikrotik routers.</li>
+                                            <li>Re-engineered the IP address schema for guest and back-office networks.
+                                            </li>
+                                            <li>Deployed and managed network environments via Ruijie, Unifi, and TP-Link
+                                                Omada cloud controllers.</li>
+                                            <li>Established a monitoring system using Grafana and a Telegram bot for
+                                                real-time alerts.</li>
+                                            <li>Implemented a QNap NAS, IPTV system, and various digital signage
+                                                solutions.</li>
+                                        </ul>
+                                    </div>
+                                </button>
+                            </div>
+                            <div class="timeline-item pl-12 relative">
+                                <div
+                                    class="timeline-node absolute left-4 top-1 -ml-[11px] w-6 h-6 bg-slate-800 border-4 border-slate-700 rounded-full">
+                                </div>
+                                <button class="w-full text-left group">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h3 class="text-xl font-semibold text-white">IT Engineering (Internship)
+                                            </h3>
+                                            <p class="text-md text-slate-400">Perum LPPNPI (Airnav Indonesia)</p>
+                                            <p class="text-sm text-slate-500 font-mono">September 2019 – November 2019
+                                            </p>
+                                        </div>
+                                        <span
+                                            class="icon text-cyan-400 transform transition-transform duration-300 mr-2">&#9654;</span>
+                                    </div>
+                                    <div class="details text-slate-300 leading-relaxed">
+                                        <ul class="list-disc list-inside space-y-2 mt-2 pl-2 marker:text-cyan-400">
+                                            <li>Performed routine system maintenance, including server monitoring and
+                                                data backups.</li>
+                                            <li>Provided troubleshooting and support for critical systems like
+                                                Clonezilla, Symantec Ghost, and DivOS.</li>
+                                        </ul>
+                                    </div>
+                                </button>
+                            </div>
+                            <div class="timeline-item pl-12 relative">
+                                <div
+                                    class="timeline-node absolute left-4 top-1 -ml-[11px] w-6 h-6 bg-slate-800 border-4 border-slate-700 rounded-full">
+                                </div>
+                                <button class="w-full text-left group">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h3 class="text-xl font-semibold text-white">IT Support (Part-Time)</h3>
+                                            <p class="text-md text-slate-400">Notaris PPAT Fitrianingsih, SH</p>
+                                            <p class="text-sm text-slate-500 font-mono">July 2017 – August 2019</p>
+                                        </div>
+                                        <span
+                                            class="icon text-cyan-400 transform transition-transform duration-300 mr-2">&#9654;</span>
+                                    </div>
+                                    <div class="details text-slate-300 leading-relaxed">
+                                        <ul class="list-disc list-inside space-y-2 mt-2 pl-2 marker:text-cyan-400">
+                                            <li>Designed and deployed the office's local area network (LAN) from the
+                                                ground up.</li>
+                                            <li>Implemented secure remote access solutions using FTPS and Nextcloud
+                                                servers.</li>
+                                            <li>Managed network hardware (Huawei, Mikrotik) and virtual environments
+                                                (VMware, Ubuntu Server).</li>
+                                        </ul>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <section id="contact" class="py-16 md:py-24">
-            <div class="max-w-3xl mx-auto text-center">
-                <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Get In Touch</h2>
-                <div class="w-24 h-1 bg-sky-500 mx-auto mt-4 mb-8"></div>
-                <p class="text-lg text-slate-600 leading-relaxed mb-8">
-                    I am actively exploring new opportunities in networking and cloud computing. If you have a project
-                    or role where my skills could be of value, please don't hesitate to reach out.
-                </p>
-                <a href="mailto:aka.arya7@gmail.com"
-                    class="inline-block bg-sky-500 text-white font-bold text-lg px-8 py-3 rounded-full shadow-lg hover:bg-sky-600 transition-all transform hover:scale-105">
-                    Contact Me
-                </a>
-            </div>
-        </section>
+            <section id="education" class="py-16 md:py-20 glass-card rounded-xl">
+                <div class="text-center px-6">
+                    <h2 class="text-3xl font-bold text-white tracking-tight">Education & Certifications</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-slate-400">My formal education provided the foundation for my
+                        technical career, complemented by industry-standard certifications that validate my skills.</p>
+                    <div class="w-24 h-1 bg-cyan-400 mx-auto mt-4 mb-8"></div>
+                </div>
+                <div class="max-w-4xl mx-auto mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 text-center px-6">
+                    <div class="bg-slate-900/70 p-6 rounded-lg border border-slate-700">
+                        <h3 class="text-xl font-semibold text-white">Serang Raya University</h3>
+                        <p class="text-slate-300 mt-1">Bachelor of Computer Science (S.Kom), Computer Systems</p>
+                        <p class="text-sm text-slate-500 font-mono">2017 – 2021</p>
+                        <p class="mt-2 font-medium text-cyan-400">GPA: 3.59</p>
+                    </div>
+                    <div class="bg-slate-900/70 p-6 rounded-lg border border-slate-700">
+                        <h3 class="text-xl font-semibold text-white">Industry Certifications</h3>
+                        <ul class="mt-2 space-y-1 text-slate-300">
+                            <li>CCNA</li>
+                            <li>Mikrotik Certified</li>
+                            <li>Ruijie Reyee Certified</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="contact" class="py-16 md:py-20 text-center">
+                <div class="max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold text-white tracking-tight">Get In Touch</h2>
+                    <div class="w-24 h-1 bg-cyan-400 mx-auto mt-4 mb-8"></div>
+                    <p class="text-lg text-slate-400 leading-relaxed mb-8">
+                        I am actively exploring new opportunities in networking and cloud computing. If you have a
+                        project or role where my skills could be of value, please don't hesitate to reach out.
+                    </p>
+                    <a href="mailto:aka.arya7@gmail.com"
+                        class="inline-block bg-cyan-400 text-slate-900 font-bold text-lg px-8 py-4 rounded-full shadow-lg shadow-cyan-500/20 hover:bg-cyan-300 transition-all transform hover:scale-105">
+                        Contact Me
+                    </a>
+                </div>
+            </section>
+        </div>
     </main>
 
-    <footer class="bg-slate-800 text-slate-400 py-6">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm">
-            <p>&copy; 2025 Raka Ariya Ramadhani. Interactive CV built to showcase skills and experience.</p>
+    <footer class="text-slate-500 py-8 mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm font-mono">
+            <p>&copy; 2025 Raka Ariya Ramadhani. Interactive CV v2.0</p>
         </div>
     </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+
+            // Background Network Animation
+            const canvas = document.getElementById('network-bg');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let particles = [];
+            const particleCount = Math.floor(canvas.width / 30);
+            const mouse = { x: null, y: null, radius: 150 };
+
+            window.addEventListener('mousemove', (event) => {
+                mouse.x = event.x;
+                mouse.y = event.y;
+            });
+            window.addEventListener('mouseout', () => {
+                mouse.x = null;
+                mouse.y = null;
+            });
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 2 + 1;
+                    this.speedX = Math.random() * 2 - 1;
+                    this.speedY = Math.random() * 2 - 1;
+                    this.color = '#0e7490'; // cyan-700
+                }
+                update() {
+                    if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+                    if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                }
+                draw() {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function initParticles() {
+                particles = [];
+                for (let i = 0; i < particleCount; i++) {
+                    particles.push(new Particle());
+                }
+            }
+
+            function connectParticles() {
+                let opacityValue = 1;
+                for (let a = 0; a < particles.length; a++) {
+                    for (let b = a; b < particles.length; b++) {
+                        let distance = Math.sqrt(
+                            Math.pow(particles[a].x - particles[b].x, 2) +
+                            Math.pow(particles[a].y - particles[b].y, 2)
+                        );
+                        if (distance < 100) {
+                            opacityValue = 1 - (distance / 100);
+                            ctx.strokeStyle = `rgba(14, 116, 144, ${opacityValue})`; // cyan-700
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.moveTo(particles[a].x, particles[a].y);
+                            ctx.lineTo(particles[b].x, particles[b].y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = 0; i < particles.length; i++) {
+                    particles[i].update();
+                    particles[i].draw();
+                }
+                connectParticles();
+                requestAnimationFrame(animate);
+            }
+
+            initParticles();
+            animate();
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                initParticles();
+            });
+
+            // Typing effect
+            const typingTextElement = document.getElementById('typing-text');
+            const textToType = "Network Engineer & IT Operations Specialist";
+            let charIndex = 0;
+            function type() {
+                if (charIndex < textToType.length) {
+                    typingTextElement.innerHTML = textToType.substring(0, charIndex + 1) + '<span class="typing-cursor"></span>';
+                    charIndex++;
+                    setTimeout(type, 100);
+                } else {
+                    typingTextElement.innerHTML = textToType + '<span class="typing-cursor"></span>';
+                }
+            }
+            type();
+
 
             // Mobile menu toggle
             const mobileMenuButton = document.getElementById('mobile-menu-button');
@@ -368,12 +559,8 @@
             mobileMenuButton.addEventListener('click', () => {
                 mobileMenu.classList.toggle('hidden');
             });
-
-            // Close mobile menu on link click
             document.querySelectorAll('#mobile-menu a').forEach(link => {
-                link.addEventListener('click', () => {
-                    mobileMenu.classList.add('hidden');
-                });
+                link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
             });
 
             // Skills data
@@ -406,10 +593,9 @@
             function updateSkillDetails(skillKey) {
                 const skill = skillsData[skillKey];
                 if (!skill) return;
-
-                let content = `<h3 class="text-lg font-bold text-slate-800 mb-3">${skill.title}</h3><ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">`;
+                let content = `<h3 class="text-lg font-bold text-white mb-3">${skill.title}</h3><ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">`;
                 skill.items.forEach(item => {
-                    content += `<li class="flex items-center"><span class="text-sky-500 mr-2">&#10003;</span>${item}</li>`;
+                    content += `<li class="flex items-start"><span class="text-cyan-400 mr-3 mt-1">&#9679;</span>${item}</li>`;
                 });
                 content += '</ul>';
                 skillDetailsContainer.innerHTML = content;
@@ -419,52 +605,42 @@
                 button.addEventListener('click', () => {
                     skillButtons.forEach(btn => btn.classList.remove('active'));
                     button.classList.add('active');
-                    const skillKey = button.dataset.skill;
-                    updateSkillDetails(skillKey);
+                    updateSkillDetails(button.dataset.skill);
                 });
             });
-
-            // Initialize with the first skill
             updateSkillDetails('networking');
 
             // Radar Chart
-            const ctx = document.getElementById('skillsRadarChart').getContext('2d');
-            const skillsRadarChart = new Chart(ctx, {
+            const radarCtx = document.getElementById('skillsRadarChart').getContext('2d');
+            const skillsRadarChart = new Chart(radarCtx, {
                 type: 'radar',
                 data: {
                     labels: ['Networking', 'Security', 'Cloud Tech', 'IT Support', 'Monitoring', 'Hardware Mgmt'],
                     datasets: [{
                         label: 'Competency Level',
                         data: [90, 80, 75, 85, 88, 90],
-                        backgroundColor: 'rgba(14, 165, 233, 0.2)', // sky-500 with opacity
-                        borderColor: 'rgba(14, 165, 233, 1)', // sky-500
+                        backgroundColor: 'rgba(34, 211, 238, 0.2)',
+                        borderColor: 'rgba(34, 211, 238, 1)',
                         borderWidth: 2,
-                        pointBackgroundColor: 'rgba(14, 165, 233, 1)',
+                        pointBackgroundColor: 'rgba(34, 211, 238, 1)',
                         pointBorderColor: '#fff',
                         pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(14, 165, 233, 1)'
+                        pointHoverBorderColor: 'rgba(34, 211, 238, 1)'
                     }]
                 },
                 options: {
                     maintainAspectRatio: false,
                     scales: {
                         r: {
-                            angleLines: {
-                                color: 'rgba(51, 65, 85, 0.2)'
-                            },
-                            grid: {
-                                color: 'rgba(51, 65, 85, 0.2)'
-                            },
+                            angleLines: { color: 'rgba(100, 116, 139, 0.4)' },
+                            grid: { color: 'rgba(100, 116, 139, 0.2)' },
                             pointLabels: {
-                                font: {
-                                    size: 12,
-                                    weight: '500'
-                                },
-                                color: '#334155'
+                                font: { size: 12, weight: '500', family: "'Roboto Mono', monospace" },
+                                color: '#94a3b8' // slate-400
                             },
                             ticks: {
-                                backdropColor: 'rgba(248, 250, 252, 0)',
-                                color: 'rgba(100, 116, 139, 0.8)',
+                                backdropColor: 'transparent',
+                                color: '#64748b', // slate-500
                                 stepSize: 20
                             },
                             suggestedMin: 0,
@@ -472,9 +648,7 @@
                         }
                     },
                     plugins: {
-                        legend: {
-                            display: false
-                        }
+                        legend: { display: false }
                     }
                 }
             });
@@ -485,11 +659,7 @@
                 item.addEventListener('click', () => {
                     const parent = item.parentElement;
                     const wasOpen = parent.classList.contains('open');
-
-                    // Close all items
                     document.querySelectorAll('.timeline-item').forEach(el => el.classList.remove('open'));
-
-                    // If it wasn't open, open it
                     if (!wasOpen) {
                         parent.classList.add('open');
                     }
