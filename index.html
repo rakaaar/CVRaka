@@ -13,12 +13,13 @@
         href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&family=Inter:wght@400;500;700&display=swap"
         rel="stylesheet">
     <!-- Chosen Palette: "Cyber Network" -->
-    <!-- Application Structure Plan: The application structure remains a top-to-bottom single-page narrative but with a significantly enhanced UI/UX. The new design uses a dark theme with a dynamic, animated network background to create an immersive "network engineer" feel. Sections are presented as "glassmorphism" cards that float over the animation. This enhances the original goal of a logical flow while adding a strong thematic layer and a "wow" factor that makes exploration more engaging. -->
+    <!-- Application Structure Plan: The application structure remains a top-to-bottom single-page narrative but with a significantly enhanced UI/UX. The new design uses a dark theme with a dynamic, animated network background to create an immersive "network engineer" feel. Sections are presented as "glassmorphism" cards that float over the animation. A new portfolio section with a modal viewer has been added. This enhances the original goal of a logical flow while adding a strong thematic layer and a "wow" factor that makes exploration more engaging. -->
     <!-- Visualization & Content Choices: 
         - Report Info: Overall skill set. -> Goal: Compare/Inform. -> Viz: Restyled Radar Chart. -> Interaction: Hover tooltips. -> Justification: The radar chart is effective; its styling is updated for the dark theme with glowing accents to fit the new aesthetic. -> Library: Chart.js (Canvas).
         - Report Info: Detailed list of technical skills. -> Goal: Organize. -> Presentation: Interactive Filterable List within a glassmorphism card. -> Interaction: Click category buttons to show/hide skills. -> Justification: The filtering interaction is maintained for usability, but the presentation is updated to match the high-tech theme. -> Library: Vanilla JS + Tailwind.
         - Report Info: Work History. -> Goal: Show Progression. -> Presentation: Futuristic Vertical Timeline. -> Interaction: Click to expand/collapse details. -> Justification: The timeline is redesigned with glowing nodes and animated reveals to feel like a system log or mission progression, enhancing the theme. -> Library: Vanilla JS + Tailwind.
         - Report Info: Hero Title. -> Goal: Engage. -> Presentation: Text with a typing animation. -> Interaction: Visual animation on load. -> Justification: Adds a dynamic, tech-centric introduction that immediately captures attention. -> Library: Vanilla JS.
+        - Report Info: Project Screenshots. -> Goal: Showcase Work. -> Presentation: Interactive Image Gallery. -> Interaction: Click thumbnail to open a full-screen modal with details. -> Justification: Provides tangible proof of work in a clean, interactive format that doesn't clutter the main page. -> Library: Vanilla JS + Tailwind.
     -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
@@ -174,6 +175,33 @@
                 opacity: 0;
             }
         }
+
+        .portfolio-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .portfolio-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), 0 0 20px rgba(34, 211, 238, 0.3);
+        }
+
+        .portfolio-item .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.9), transparent);
+            padding: 2rem 1rem 1rem;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay {
+            transition: opacity 0.3s ease-in-out;
+        }
     </style>
 </head>
 
@@ -191,6 +219,7 @@
                         <a href="#summary" class="nav-link px-3 py-2 text-sm font-medium">Summary</a>
                         <a href="#skills" class="nav-link px-3 py-2 text-sm font-medium">Skills</a>
                         <a href="#experience" class="nav-link px-3 py-2 text-sm font-medium">Experience</a>
+                        <a href="#portfolio" class="nav-link px-3 py-2 text-sm font-medium">Portfolio</a>
                         <a href="#education" class="nav-link px-3 py-2 text-sm font-medium">Education</a>
                         <a href="#contact" class="nav-link px-3 py-2 text-sm font-medium">Contact</a>
                     </div>
@@ -213,6 +242,7 @@
                     <a href="#skills" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Skills</a>
                     <a href="#experience"
                         class="nav-link block px-3 py-2 rounded-md text-base font-medium">Experience</a>
+                    <a href="#portfolio" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Portfolio</a>
                     <a href="#education" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Education</a>
                     <a href="#contact" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Contact</a>
                 </div>
@@ -397,6 +427,20 @@
                 </div>
             </section>
 
+            <section id="portfolio" class="py-16 md:py-20">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold text-white tracking-tight">Project Portfolio</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-slate-400">Here are some examples of the systems and
+                        dashboards I've implemented and managed. Click on any project to see a larger view and learn
+                        more about its purpose.</p>
+                    <div class="w-24 h-1 bg-cyan-400 mx-auto mt-4 mb-8"></div>
+                </div>
+                <div id="portfolio-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
+                    <!-- Portfolio items will be injected here by JavaScript -->
+                </div>
+            </section>
+
+
             <section id="education" class="py-16 md:py-20 glass-card rounded-xl">
                 <div class="text-center px-6">
                     <h2 class="text-3xl font-bold text-white tracking-tight">Education & Certifications</h2>
@@ -441,9 +485,30 @@
 
     <footer class="text-slate-500 py-8 mt-16">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm font-mono">
-            <p>&copy; 2025 Interactive CV Raka v2.0</p>
+            <p>&copy; 2025 Raka Ariya Ramadhani. Interactive CV v2.1</p>
         </div>
     </footer>
+
+    <!-- Portfolio Modal -->
+    <div id="portfolio-modal"
+        class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden modal-overlay">
+        <div
+            class="bg-slate-900 border border-slate-700 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-auto relative p-6">
+            <button id="modal-close-btn"
+                class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </button>
+            <img id="modal-img" src="" alt="Portfolio project image"
+                class="w-full h-auto rounded-md mb-4 border border-slate-700">
+            <h3 id="modal-title" class="text-2xl font-bold text-white mb-2"></h3>
+            <p id="modal-description" class="text-slate-400"></p>
+        </div>
+    </div>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -456,16 +521,6 @@
 
             let particles = [];
             const particleCount = Math.floor(canvas.width / 30);
-            const mouse = { x: null, y: null, radius: 150 };
-
-            window.addEventListener('mousemove', (event) => {
-                mouse.x = event.x;
-                mouse.y = event.y;
-            });
-            window.addEventListener('mouseout', () => {
-                mouse.x = null;
-                mouse.y = null;
-            });
 
             class Particle {
                 constructor() {
@@ -559,8 +614,11 @@
             mobileMenuButton.addEventListener('click', () => {
                 mobileMenu.classList.toggle('hidden');
             });
-            document.querySelectorAll('#mobile-menu a').forEach(link => {
-                link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+            document.querySelectorAll('#mobile-menu a, .nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (!link.href.includes("#")) return;
+                    mobileMenu.classList.add('hidden')
+                });
             });
 
             // Skills data
@@ -664,6 +722,79 @@
                         parent.classList.add('open');
                     }
                 });
+            });
+
+            // Portfolio Section
+            const portfolioData = [
+                {
+                    img: 'image/GrafanaNetwork Monitoring.png',
+                    title: 'Grafana Network Monitoring',
+                    description: 'A comprehensive network traffic and interface monitoring dashboard built with Grafana, providing real-time insights into network health and performance.'
+                },
+                {
+                    img: 'image/RuijieNetwork.png',
+                    title: 'Ruijie Cloud Topology',
+                    description: 'Visualizing the entire network topology using Ruijie Cloud, allowing for easy device management, monitoring, and troubleshooting from a centralized interface.'
+                },
+                {
+                    img: 'image/UnifiNetwork.png',
+                    title: 'Unifi Network Dashboard',
+                    description: 'The main dashboard for a Unifi-based network, showing WiFi activity, client connections, and overall network status at a glance.'
+                },
+                {
+                    img: 'image/TPLinkNetwork.png',
+                    title: 'TP-Link Omada Controller',
+                    description: 'Managing a TP-Link network with the Omada controller, showing client distribution, top APs, and recent network activity.'
+                },
+                {
+                    img: 'image/CMSIPTV.png',
+                    title: 'IPTV Content Management',
+                    description: 'A custom-built CMS for managing IPTV content, including scheduling greetings and messages for display on in-room hotel televisions.'
+                },
+                {
+                    img: 'image/CMSLGSupersign.png',
+                    title: 'LG SuperSign CMS',
+                    description: 'Managing digital signage content distribution across multiple displays using the LG SuperSign Content Management System.'
+                }
+            ];
+
+            const portfolioGrid = document.getElementById('portfolio-grid');
+            const modal = document.getElementById('portfolio-modal');
+            const modalImg = document.getElementById('modal-img');
+            const modalTitle = document.getElementById('modal-title');
+            const modalDescription = document.getElementById('modal-description');
+            const closeModalBtn = document.getElementById('modal-close-btn');
+
+            portfolioData.forEach((item, index) => {
+                const portfolioItem = document.createElement('div');
+                portfolioItem.className = 'portfolio-item cursor-pointer group';
+                portfolioItem.innerHTML = `
+                    <img src="${item.img}" alt="${item.title}" class="w-full h-full object-cover">
+                    <div class="overlay flex items-end">
+                        <h4 class="text-white text-lg font-bold">${item.title}</h4>
+                    </div>
+                `;
+                portfolioItem.addEventListener('click', () => openModal(index));
+                portfolioGrid.appendChild(portfolioItem);
+            });
+
+            function openModal(index) {
+                const item = portfolioData[index];
+                modalImg.src = item.img;
+                modalTitle.textContent = item.title;
+                modalDescription.textContent = item.description;
+                modal.classList.remove('hidden');
+            }
+
+            function closeModal() {
+                modal.classList.add('hidden');
+            }
+
+            closeModalBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
             });
 
         });
